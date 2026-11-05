@@ -45,3 +45,7 @@ git clone https://github.com/chuoneone/social-skills-dubbing ~/.claude/skills/du
 ## 使用提醒
 
 學生的聲音是個人資料。影片若要公開分享，請另外取得學生與監護人同意；下課可在首映頁按「下課清除所有錄音」。
+
+## 授權
+
+[MIT](LICENSE)：可以自由使用、修改與分享，請保留授權聲明。
