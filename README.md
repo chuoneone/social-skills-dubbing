@@ -31,7 +31,7 @@ python -m http.server
 把整個資料夾放到 Claude Code 的 skills 資料夾：
 
 ```bash
-git clone https://github.com/chuoneone/dubbing-lesson ~/.claude/skills/dubbing-lesson
+git clone https://github.com/chuoneone/social-skills-dubbing ~/.claude/skills/dubbing-lesson
 ```
 
 然後說：「幫我做一堂配音課，主題是加入別人的遊戲，七年級 5 個人，一節課。」
