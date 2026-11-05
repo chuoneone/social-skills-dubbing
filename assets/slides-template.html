@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>換不換？好好拒絕・配音與交換牌 - 社會技巧簡報</title>
+<style>
+  * { box-sizing: border-box; }
+  :root { --green: #1F4D3A; --mid: #1F7A55; --cream: #FBF7EF; --ink: #1E2A2A; --gold: #E8B04B; --red: #C8384A; --pale: #E3EFE6; --soft: #CFE3D6; --text: #3D4A47; --line: #D8D0BF; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #10261d; }
+  body { font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', sans-serif; -webkit-font-smoothing: antialiased; user-select: none; }
+  .deck { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; overflow: hidden; border-radius: 6px; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+  .slide { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .35s ease; padding: 96px 128px; display: flex; flex-direction: column; gap: 44px; background: var(--cream); color: var(--ink); }
+  .slide.on { opacity: 1; pointer-events: auto; }
+  .slide.dark { background: var(--green); color: var(--cream); }
+  .slide h1, .slide h2, .slide h3, .slide p, .slide ul, .slide ol { margin: 0; }
+  .slide aside { display: none; }
+  .kick { font-size: 32px; font-weight: 700; color: var(--mid); letter-spacing: 3px; }
+  .dark .kick { color: var(--gold); }
+  h2 { font-size: 72px; font-weight: 900; line-height: 1.15; }
+  .row { display: flex; gap: 36px; }
+  .card { flex: 1; display: flex; flex-direction: column; gap: 18px; padding: 44px; background: #fff; color: var(--ink); border: 3px solid var(--green); border-radius: 28px; }
+  .card h3 { font-size: 46px; font-weight: 900; }
+  .card p { font-size: 40px; line-height: 1.45; color: var(--text); }
+  .card .tag { font-family: 'Noto Sans TC', sans-serif; font-size: 72px; font-weight: 700; line-height: 1; }
+  .card.good { border-color: var(--mid); background: var(--pale); }
+  .card.bad { border-color: var(--red); background: #FBE9EB; }
+  .red { color: var(--red); }
+  .big-rule { font-size: 44px; font-weight: 700; }
+  /* 對照學習單的格號 */
+  .slide .ws { position: absolute; right: 128px; top: 50px; padding: 10px 30px; border-radius: 999px; background: var(--gold); color: var(--ink); font-size: 34px; font-weight: 900; letter-spacing: 2px; box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+
+  /* 規則 */
+  .rules { font-size: 50px; line-height: 1.6; padding-left: 72px; }
+  .rules li { margin: 6px 0; }
+  .rules b { color: var(--red); }
+
+  /* 分角色 */
+  .roles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; }
+  .role { background: #fff; color: var(--ink); border-radius: 24px; padding: 28px 20px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
+  .role .s { font-family: sans-serif; font-size: 84px; font-weight: 700; line-height: 1.05; }
+  .role b { font-size: 44px; }
+  .role span { font-size: 34px; color: var(--text); }
+
+  /* 錄音室 */
+  .studio { padding: 36px 44px; flex-direction: row; gap: 36px; background: var(--green); color: var(--cream); }
+  .studio .left { width: 1160px; display: flex; flex-direction: column; gap: 18px; }
+  .studio canvas { width: 1160px; height: 652px; border-radius: 22px; background: #fff; display: block; }
+  .status { font-size: 36px; font-weight: 700; color: var(--gold); min-height: 52px; line-height: 52px; }
+  .ctrl { display: flex; gap: 18px; align-items: center; }
+  button.b { border: 0; border-radius: 22px; font: inherit; font-size: 40px; font-weight: 900; padding: 22px 40px; cursor: pointer; background: var(--cream); color: var(--ink); transition: transform .1s ease; }
+  button.b:active { transform: scale(.97); }
+  button.b:disabled { opacity: .35; cursor: default; }
+  button.b.rec { background: var(--red); color: #fff; min-width: 340px; }
+  button.b.go { background: var(--gold); color: var(--ink); }
+  .meter { height: 22px; border-radius: 11px; background: rgba(255,255,255,.18); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: #7FE0A6; border-radius: 11px; }
+  .right { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .right .ttl { font-size: 36px; font-weight: 900; color: var(--gold); display: flex; justify-content: space-between; align-items: baseline; }
+  .list { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .li { display: grid; grid-template-columns: 44px 104px 1fr 40px; gap: 8px; align-items: center; width: 100%; text-align: left; border: 0; border-radius: 14px; padding: 10px 14px; background: rgba(255,255,255,.1); color: var(--cream); font: inherit; font-size: 26px; cursor: pointer; }
+  .li.on { background: var(--cream); color: var(--ink); font-weight: 700; }
+  .li .tx { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .li .ok { color: #7FE0A6; font-weight: 900; font-size: 30px; }
+  .li.on .ok { color: var(--mid); }
+  .tools { display: flex; gap: 10px; align-items: center; font-size: 22px; }
+  .tools select { flex: 1; min-width: 0; font: inherit; padding: 8px; border-radius: 10px; }
+  .tools button { border: 0; border-radius: 10px; background: rgba(255,255,255,.16); color: var(--cream); font: inherit; padding: 9px 14px; cursor: pointer; white-space: nowrap; }
+  .count3 { position: absolute; left: 44px; top: 36px; width: 1160px; height: 652px; border-radius: 22px; background: rgba(16,38,29,.72); display: none; align-items: center; justify-content: center; font-family: sans-serif; font-size: 300px; font-weight: 700; color: var(--gold); }
+  .count3.on { display: flex; }
+
+  /* 首映 */
+  .film { padding: 0; background: #000; }
+  .film canvas { position: absolute; inset: 0; width: 1920px; height: 1080px; display: block; }
+  .film .panel { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 34px; background: var(--green); color: var(--cream); text-align: center; }
+  .film .panel.off { display: none; }
+  .film h2 { font-size: 110px; }
+  .film .msg { font-size: 40px; color: var(--soft); }
+  .film .ctrl button.b { font-size: 46px; padding: 28px 56px; }
+  .film .clear { border: 0; background: transparent; color: var(--soft); font: inherit; font-size: 26px; cursor: pointer; text-decoration: underline; }
+
+  /* 底部控制列 */
+  .bar { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 999px; background: rgba(16, 38, 29, .78); backdrop-filter: blur(10px); color: #FBF7EF; font-size: 15px; z-index: 10; opacity: .35; transition: opacity .25s; }
+  .bar:hover, .bar:focus-within { opacity: 1; }
+  .bar.hide { display: none; }
+  .bar button { border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+  .bar button:hover { background: rgba(255,255,255,.15); }
+  .bar .count { min-width: 64px; text-align: center; font-family: sans-serif; font-weight: 600; }
+  .progress { position: fixed; left: 0; top: 0; height: 4px; background: var(--gold); transition: width .35s ease; z-index: 10; }
+  .notes { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); width: min(900px, calc(100vw - 32px)); max-height: 30vh; overflow: auto; padding: 14px 18px; border-radius: 14px; background: rgba(251, 247, 239, .96); color: #1E2A2A; font-size: 17px; line-height: 1.6; box-shadow: 0 10px 30px rgba(0,0,0,.3); display: none; z-index: 10; }
+  .notes.on { display: block; }
+  .notes b { color: #1F7A55; }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+<section class="slide dark" style="justify-content:center;gap:40px">
+  <div style="position:absolute;left:1240px;top:180px;width:300px;height:420px;background:var(--cream);border-radius:28px;box-shadow:0 24px 60px rgba(0,0,0,.35);transform:rotate(-8deg)"></div>
+  <div style="position:absolute;left:1420px;top:300px;width:300px;height:420px;background:var(--cream);border-radius:28px;box-shadow:0 24px 60px rgba(0,0,0,.35);transform:rotate(7deg)"></div>
+  <p style="position:absolute;left:1270px;top:220px;font-family:Arial,sans-serif;font-size:96px;font-weight:700;color:var(--ink);transform:rotate(-8deg)">♠K</p>
+  <p style="position:absolute;left:1450px;top:340px;font-family:Arial,sans-serif;font-size:96px;font-weight:700;color:var(--red);transform:rotate(7deg)">♥7</p>
+  <p class="kick">社會技巧・撲克牌課</p>
+  <h1 style="font-size:150px;font-weight:900;line-height:1.1">換不換？</h1>
+  <p style="font-size:48px;color:var(--soft);width:1000px">先替短片配音，再玩交換牌：<br>不想答應時，怎麼好好拒絕</p>
+  <aside>開場 30 秒。今天的流程：配音、一起看大家的影片、玩交換牌。全程約 45 分鐘。</aside>
+</section>
+
+<section class="slide">
+  <p class="ws">學習單 ①</p>
+  <p class="kick">分角色｜約 3 分鐘</p>
+  <h2>今天先當配音員</h2>
+  <p style="font-size:44px;color:var(--text)">我們來幫短片配音：有同學想借手機玩遊戲，你不想借，怎麼說？</p>
+  <div class="roles" style="background:var(--green);padding:28px;border-radius:30px">
+    <div class="role"><p class="s">🃏</p><b>旁白</b><span>第 1、6 句</span></div>
+    <div class="role"><p class="s">♦</p><b>阿哲</b><span>第 2、8 句</span></div>
+    <div class="role"><p class="s">♣</p><b>小宇</b><span>第 3、7 句</span></div>
+    <div class="role"><p class="s red">♥</p><b>小晴</b><span>第 4、9 句</span></div>
+    <div class="role"><p class="s">♠</p><b>導演</b><span>第 5、10 句</span></div>
+  </div>
+  <p class="big-rule">抽牌分角色。想換角色？好好問：<span class="red">「我想跟你換，可以嗎？」</span></p>
+  <aside>事先抽出鬼牌與 ♦♣♥♠ 各一張讓學生抽。不想錄音的學生可改當場記按按鈕，或由老師代配，不勉強。如有學生跟角色同名，改用撲克牌花色稱呼。先約定：我們聽到別人的聲音只給讚，不笑。</aside>
+</section>
+
+<section class="slide studio" data-interactive id="studio">
+  <div class="left">
+    <canvas id="studioCanvas" width="1280" height="720"></canvas>
+    <div class="status" id="status">按紅色按鈕開始；第一次請允許使用麥克風。</div>
+    <div class="meter"><i id="meter"></i></div>
+    <div class="ctrl">
+      <button class="b rec" id="recBtn">● 開始錄音</button>
+      <button class="b" id="listenBtn" disabled>▶ 聽一次</button>
+      <button class="b go" id="nextLine">下一句 ➜</button>
+    </div>
+  </div>
+  <div class="right">
+    <div class="ttl"><span>🎙️ 配音室</span><span id="doneCount">0 / 10</span></div>
+    <div class="list" id="list"></div>
+    <div class="tools"><select id="micSel" aria-label="選擇麥克風"><option value="">預設麥克風</option></select></div>
+  </div>
+  <div class="count3" id="count3">3</div>
+  <aside>約 12 分鐘，每句約 1 分鐘。錄完會自動播放一次，不滿意就再按紅色按鈕重錄；搞笑聲音也可以。下一位先在旁邊小聲練習。錄音存在這台電腦的瀏覽器裡，不會上傳，重新整理也不會消失。</aside>
+</section>
+
+<section class="slide film" data-interactive id="film">
+  <canvas id="filmCanvas" width="1280" height="720"></canvas>
+  <div class="panel" id="filmPanel">
+    <h2>🎬 首映會</h2>
+    <p class="msg" id="filmMsg">準備好了嗎？全班一起看！</p>
+    <div class="ctrl">
+      <button class="b go" id="playFilm">▶ 開始首映</button>
+      <button class="b" id="dlFilm" disabled>⬇ 下載影片</button>
+    </div>
+    <button class="clear" id="clearAll">下課清除所有錄音</button>
+  </div>
+  <aside>約 4 分鐘。播放同時會合成影片，播完才能下載；播放中按 Esc 可中止。老師先帶頭稱讚每個人的聲音。影片不會自動上傳；如之後要公開分享，請另外取得學生與家長同意。下課前按「清除所有錄音」。</aside>
+</section>
+
+<section class="slide">
+  <p class="ws">學習單 ②</p>
+  <p class="kick">看完影片｜約 2 分鐘</p>
+  <h2>都是拒絕，你比較想跟誰當朋友？</h2>
+  <div class="row" style="align-items:stretch">
+    <div class="card bad"><p class="tag red">A</p><p style="font-size:60px;font-weight:900;color:var(--ink)">「不要！你很煩耶，<br>走開啦！」</p></div>
+    <div class="card good"><p class="tag" style="color:var(--mid)">B</p><p style="font-size:60px;font-weight:900;color:var(--ink)">「手機不能借，快沒電了。<br>我玩給你看可以嗎？」</p></div>
+  </div>
+  <p class="big-rule">我選 ＿，因為：<span class="red">比較不會生氣／下次還想跟他玩／不會傷到對方</span></p>
+  <aside>剛看完影片，直接問。請每人比 A 或 B，用「我選＿，因為＿」回答，理由可直接選畫面上的。</aside>
+</section>
+
+<section class="slide dark" style="justify-content:center">
+  <p class="ws">學習單 ③</p>
+  <p class="kick">好好拒絕三步驟｜約 1 分鐘</p>
+  <h2 style="font-size:96px">拒絕可以，話要好好說</h2>
+  <div class="row" style="align-items:stretch">
+    <div class="card"><p class="tag red">1</p><h3>說不行</h3><p>手機不能借</p></div>
+    <div class="card"><p class="tag red">2</p><h3>說原因</h3><p>快沒電了</p></div>
+    <div class="card"><p class="tag red">3</p><h3>給替代</h3><p>我玩給你看可以嗎？</p></div>
+  </div>
+  <aside>全班一起唸一次三步驟。接著說：這些話，我們現在用撲克牌來練。</aside>
+</section>
+
+<section class="slide dark">
+  <p class="kick">三張回應卡｜約 2 分鐘</p>
+  <h2>別人問你換不換，有三種好回答</h2>
+  <div class="row" style="align-items:stretch">
+    <div class="card"><p class="tag" style="color:var(--mid)">♦ 答應</p><p style="font-size:48px;font-weight:900;color:var(--ink)">「好，換！」</p></div>
+    <div class="card"><p class="tag red">♠ 拒絕</p><p style="font-size:48px;font-weight:900;color:var(--ink)">「不換，因為<br>我自己要用。」</p></div>
+    <div class="card"><p class="tag" style="color:#8a5a12">♥ 談判</p><p style="font-size:48px;font-weight:900;color:var(--ink)">「K 不行，<br>換別張可以嗎？」</p></div>
+  </div>
+  <p class="big-rule" style="color:var(--soft)">想不到時，看著卡唸就好，也可以先說「我想一下」。</p>
+  <aside>帶大家各唸一次。練習時讓學生看著畫面照唸，不需要背，說話較慢的學生也有時間看。</aside>
+</section>
+
+<section class="slide">
+  <p class="kick">交換牌規則</p>
+  <h2>先湊到 4 張同數字，喊「成交」</h2>
+  <ol class="rules">
+    <li>每人 5 張牌，剩下的放中間當牌堆。</li>
+    <li>輪到你：指定一個人問「我用一張牌換你的 <b>K</b>，好嗎？」</li>
+    <li>對方用回應卡回答；沒有那張就說「我沒有 K」。</li>
+    <li>答應就各交出一張牌；沒換成就抽一張、丟一張。</li>
+    <li>不換也可以；被拒絕不追問，下一輪再問別人。</li>
+    <li>4 張同數字放到桌上，喊「<b>成交</b>」：這局結束，重新發牌。</li>
+  </ol>
+  <aside>老師先和一位學生示範一輪。規則還沒實際玩過：如果 5 分鐘都沒人成交，改成湊 3 張同數字；學生堅持不換是可以的，不要求他答應，這正是今天練的事。被拒絕的人不追問，這輪抽一張、丟一張，下一輪可以問別人，牌局不會因此卡住。如果全桌都只拒絕，可以改成只替「談判」比讚，或加碼「開市 1 分鐘」；同一人每局最多比讚一次，避免為了拿讚而一直拒絕。只要有一人成交，這局就結束，重新洗牌再開一局，不累計名次。</aside>
+</section>
+
+<section class="slide dark">
+  <p class="ws">學習單 ④</p>
+  <p class="kick">開始玩｜約 16 分鐘</p>
+  <h2>🃏 說得好，牌局也會變順</h2>
+  <div class="row" style="align-items:stretch">
+    <div class="card"><h3>好好拒絕，說出原因</h3><p>「不換，因為我要用。」</p></div>
+    <div class="card"><h3>被拒絕，說沒關係</h3><p>「沒關係，那我抽牌。」</p></div>
+  </div>
+  <p style="font-size:60px;font-weight:900;color:var(--gold)">老師比讚的人：再抽一張、丟一張！</p>
+  <p class="big-rule" style="color:var(--soft)">「好，換！」／「不換，因為＿＿」／「＿＿不行，換＿＿可以嗎？」</p>
+  <aside>這頁留在畫面上當句型提示。先輪流玩；學生熟了以後，可加碼「開市 1 分鐘」讓大家同時喊著換牌。牌局放在最後，下課前約 3 分鐘收牌，留時間收尾。</aside>
+</section>
+
+<section class="slide dark" style="justify-content:center">
+  <p class="ws">學習單 ⑥</p>
+  <p class="kick">今天帶走的話｜約 3 分鐘</p>
+  <h2 style="font-size:84px">下次不想答應時，你想用哪一句？</h2>
+  <div class="row" style="align-items:stretch">
+    <div class="card"><p class="tag red">1</p><p style="font-size:44px;font-weight:900;color:var(--ink)">「不行，因為＿＿。」</p></div>
+    <div class="card"><p class="tag red">2</p><p style="font-size:44px;font-weight:900;color:var(--ink)">「＿＿不行，<br>換＿＿可以嗎？」</p></div>
+    <div class="card"><p class="tag red">3</p><p style="font-size:44px;font-weight:900;color:var(--ink)">「今天不行，<br>明天可以嗎？」</p></div>
+  </div>
+  <p class="big-rule" style="color:var(--gold)">比 1、2、3，告訴隔壁同學！</p>
+  <aside>每人比一個數字即可。提醒：若對方的要求讓你不舒服或不安全，可以只說「不行」，不一定要給替代方案，也可以找老師幫忙。下課前回首映頁按「下課清除所有錄音」。</aside>
+</section>
+
+</div>
+
+<div class="notes" id="notes"></div>
+<div class="bar" id="bar">
+  <button id="prev" title="上一頁">◀</button>
+  <span class="count" id="count"></span>
+  <button id="next" title="下一頁">▶</button>
+  <button id="noteBtn" title="講稿 (N)">講稿</button>
+  <button id="fsBtn" title="全螢幕 (F)">全螢幕</button>
+</div>
+
+<script>
+(() => {
+  /* ===== 劇本：新課主要改這一段（STORY、ROLE、LINES、ORDER），再依劇情調整下面的 BEATS =====
+     STORY.id 每一課都要換，錄音依它分開保存，沿用舊的會聽到舊課的聲音。 */
+  const STORY = {
+    id: 'swap-phone',
+    title: '手機借我玩一下',
+    credit: '全班配音作品',
+    endLine: '拒絕可以，話要好好說',
+    endSub: '說不行　＋　說原因　＋　給替代',
+    endCredit: '配音：全班一起完成 👏',
+    file: '手機借我玩一下_全班配音',
+  };
+  const ROLE = {
+    '旁白': { color: '#5B6470', suit: '🃏' },
+    '阿哲': { color: '#2F6FB5', suit: '♦' },
+    '小宇': { color: '#D0702A', suit: '♣' },
+    '小晴': { color: '#8B4FB0', suit: '♥' },
+    '導演': { color: '#1E2A2A', suit: '♠' },
+  };
+  const LINES = [
+    { id: 1, role: '旁白', text: '放學了，大家在校門口等人。', beat: 'intro' },
+    { id: 2, role: '阿哲', text: '小宇，手機借我玩一下遊戲好不好？', beat: 'ask' },
+    { id: 3, role: '小宇', text: '不要！你很煩耶，走開啦！', beat: 'rude' },
+    { id: 4, role: '小晴', text: '只是問一下，有必要這樣說嗎？', beat: 'hurt' },
+    { id: 5, role: '導演', text: '卡！這樣下次誰還想理你？倒帶！', beat: 'cut' },
+    { id: 6, role: '旁白', text: '時間回到剛才……', beat: 'intro' },
+    { id: 7, role: '小宇', text: '手機不能借，快沒電了。我玩給你看可以嗎？', beat: 'kind' },
+    { id: 8, role: '阿哲', text: '好啊，沒關係，那我看你玩！', beat: 'okay' },
+    { id: 9, role: '小晴', text: '這樣說，下次大家還會一起玩。', beat: 'happy' },
+    { id: 10, role: '導演', text: '卡！這次過關！', beat: 'pass' },
+  ];
+  const byId = id => LINES.find(l => l.id === id);
+  // 影片順序：倒帶後第 2 句自動重播
+  const ORDER = [1, 2, 3, 4, 5, 'rewind', 6, 2, 7, 8, 9, 10];
+
+  /* ===== 畫面 ===== */
+  const FONT = "'Microsoft JhengHei','PingFang TC','Noto Sans TC',sans-serif";
+  const BEATS = {
+    intro: { zhe: -160, yu: 'look', zheM: 'calm', qing: 'calm' },
+    ask: { zhe: 330, yu: 'look', zheM: 'smile', qing: 'calm', zheFrom: -160 },
+    rude: { zhe: 330, yu: 'angry', zheM: 'shock', qing: 'shock', shake: 1 },
+    hurt: { zhe: 330, yu: 'angry', zheM: 'sad', qing: 'frown' },
+    cut: { zhe: 330, yu: 'angry', zheM: 'sad', qing: 'frown', gray: 1, clap: '卡！' },
+    kind: { zhe: 330, yu: 'smile', zheM: 'calm', qing: 'calm', phone: 1 },
+    okay: { zhe: 440, yu: 'smile', zheM: 'happy', qing: 'smile', zheFrom: 330 },
+    happy: { zhe: 440, yu: 'happy', zheM: 'happy', qing: 'happy' },
+    pass: { zhe: 440, yu: 'happy', zheM: 'happy', qing: 'happy', clap: '過關！', confetti: 1 },
+  };
+
+  function rr(c, x, y, w, h, r) { c.beginPath(); c.roundRect(x, y, w, h, r); }
+
+  function background(c) {
+    const g = c.createLinearGradient(0, 0, 0, 500);
+    g.addColorStop(0, '#FFD9A8'); g.addColorStop(1, '#FFF3DC');
+    c.fillStyle = g; c.fillRect(0, 0, 1280, 720);
+    c.fillStyle = '#FFB74D'; c.beginPath(); c.arc(1110, 110, 58, 0, 7); c.fill();
+    // 校舍
+    c.fillStyle = '#EFE4D0'; c.fillRect(120, 150, 1040, 310);
+    c.fillStyle = '#C96F4A'; c.fillRect(100, 130, 1080, 26);
+    c.fillStyle = '#A9D4E8';
+    for (let i = 0; i < 6; i++) { c.fillRect(170 + i * 165, 195, 105, 74); c.fillRect(170 + i * 165, 315, 105, 74); }
+    // 校門柱
+    c.fillStyle = '#8D7B68'; c.fillRect(54, 300, 56, 240); c.fillRect(1170, 300, 56, 240);
+    // 樹
+    c.fillStyle = '#7A5A3C'; c.fillRect(38, 340, 26, 180);
+    c.fillStyle = '#6FAE6B'; c.beginPath(); c.arc(50, 300, 78, 0, 7); c.fill();
+    // 地面
+    c.fillStyle = '#C9BFAE'; c.fillRect(0, 460, 1280, 260);
+    c.fillStyle = '#BDB3A1'; c.fillRect(0, 460, 1280, 8);
+  }
+
+  function person(c, x, opt) {
+    const { body, hair, style, mood, talking, level, t, phone } = opt;
+    const lift = talking ? Math.abs(Math.sin(t * 7)) * 8 : Math.sin(t * 2 + x) * 2;
+    const y = 495 - lift;
+    c.save(); c.translate(x, y);
+    // 影子
+    c.fillStyle = 'rgba(0,0,0,.14)'; c.beginPath(); c.ellipse(0, 112 + lift, 78, 15, 0, 0, 7); c.fill();
+    // 腿與身體
+    c.fillStyle = '#3C4656'; rr(c, -44, 60, 34, 54, 10); c.fill(); rr(c, 10, 60, 34, 54, 10); c.fill();
+    c.fillStyle = body; rr(c, -62, -42, 124, 118, 34); c.fill();
+    // 頭
+    c.fillStyle = '#FFD8B8'; c.beginPath(); c.arc(0, -96, 72, 0, 7); c.fill();
+    // 髮型
+    c.fillStyle = hair;
+    c.beginPath(); c.arc(0, -108, 74, Math.PI, 0); c.quadraticCurveTo(38, -136, 0, -128); c.quadraticCurveTo(-42, -132, -74, -108); c.fill();
+    if (style === 'tail') { c.beginPath(); c.ellipse(82, -90, 22, 54, .2, 0, 7); c.fill(); }
+    if (style === 'spike') { for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(i * 26 - 16, -160); c.lineTo(i * 26, -196); c.lineTo(i * 26 + 16, -160); c.fill(); } }
+    // 五官
+    c.strokeStyle = '#2C2C2C'; c.fillStyle = '#2C2C2C'; c.lineCap = 'round'; c.lineWidth = 6;
+    const eyeY = mood === 'look' ? -84 : -94;
+    if (mood === 'happy') {
+      [-26, 26].forEach(ex => { c.beginPath(); c.arc(ex, eyeY + 4, 12, Math.PI, 0); c.stroke(); });
+    } else {
+      const er = mood === 'shock' ? 11 : 8;
+      [-26, 26].forEach(ex => { c.beginPath(); c.arc(ex, eyeY, er, 0, 7); c.fill(); });
+    }
+    c.lineWidth = 6;
+    if (mood === 'angry' || mood === 'frown') {
+      c.beginPath(); c.moveTo(-42, eyeY - 26); c.lineTo(-14, eyeY - 14); c.moveTo(42, eyeY - 26); c.lineTo(14, eyeY - 14); c.stroke();
+    } else if (mood === 'sad') {
+      c.beginPath(); c.moveTo(-42, eyeY - 14); c.lineTo(-14, eyeY - 26); c.moveTo(42, eyeY - 14); c.lineTo(14, eyeY - 26); c.stroke();
+    }
+    // 嘴
+    const open = talking ? Math.max(4, Math.min(26, (level || 0) * 150)) : 0;
+    const my = -60;
+    if (open > 2) {
+      c.fillStyle = '#A33B3B'; c.beginPath(); c.ellipse(0, my + 2, 16, open, 0, 0, 7); c.fill();
+    } else if (mood === 'happy' || mood === 'smile') {
+      c.beginPath(); c.arc(0, my - 8, 20, .25, Math.PI - .25); c.stroke();
+    } else if (mood === 'sad' || mood === 'angry' || mood === 'frown') {
+      c.beginPath(); c.arc(0, my + 14, 18, Math.PI + .4, -.4); c.stroke();
+    } else if (mood === 'shock') {
+      c.beginPath(); c.arc(0, my, 10, 0, 7); c.stroke();
+    } else {
+      c.beginPath(); c.moveTo(-14, my); c.lineTo(14, my); c.stroke();
+    }
+    // 手機
+    if (phone) {
+      c.fillStyle = '#23272E'; rr(c, -30, -20, 60, 92, 10); c.fill();
+      c.fillStyle = '#8FD3F4'; rr(c, -24, -13, 48, 76, 5); c.fill();
+      if (phone === 'low') {
+        c.strokeStyle = '#fff'; c.lineWidth = 3; c.strokeRect(-14, 18, 28, 14);
+        c.fillStyle = '#E04848'; c.fillRect(-12, 20, 6, 10);
+      }
+    }
+    c.restore();
+  }
+
+  function subtitle(c, line) {
+    if (!line) return;
+    const r = ROLE[line.role];
+    c.font = `900 40px ${FONT}`;
+    const tw = c.measureText(line.text).width;
+    const chipW = 118, total = Math.min(1220, tw + chipW + 40), x = (1280 - total) / 2, y = 636;
+    c.fillStyle = 'rgba(16,24,22,.86)'; rr(c, x, y, total, 68, 18); c.fill();
+    c.fillStyle = r.color === '#1E2A2A' ? '#E8B04B' : r.color; rr(c, x + 8, y + 8, chipW - 14, 52, 12); c.fill();
+    c.fillStyle = r.color === '#1E2A2A' ? '#1E2A2A' : '#fff'; c.font = `900 30px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(line.role, x + 8 + (chipW - 14) / 2, y + 35);
+    c.fillStyle = '#fff'; c.font = `900 40px ${FONT}`; c.textAlign = 'left';
+    c.fillText(line.text, x + chipW + 8, y + 36, total - chipW - 24);
+  }
+
+  function clapper(c, label, p) {
+    const s = Math.min(1, p * 5);
+    c.save(); c.translate(640, 250); c.scale(.6 + s * .4, .6 + s * .4); c.rotate(-.04);
+    c.fillStyle = '#1E2A2A'; rr(c, -220, -80, 440, 210, 16); c.fill();
+    c.save(); c.translate(-220, -84); c.rotate(-.12 * (1 - Math.min(1, p * 6)));
+    c.fillStyle = '#fff'; c.fillRect(0, -44, 440, 44);
+    c.fillStyle = '#1E2A2A'; for (let i = 0; i < 6; i++) { c.beginPath(); c.moveTo(i * 80 + 8, -44); c.lineTo(i * 80 + 50, -44); c.lineTo(i * 80 + 22, 0); c.lineTo(i * 80 - 20, 0); c.fill(); }
+    c.restore();
+    c.fillStyle = '#FFD45E'; c.font = `900 110px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(label, 0, 26);
+    c.restore();
+  }
+
+  function confetti(c, t) {
+    const colors = ['#E8B04B', '#C8384A', '#1F7A55', '#2F6FB5', '#8B4FB0'];
+    for (let i = 0; i < 70; i++) {
+      const sx = (i * 197) % 1280, sp = 130 + (i * 37) % 170;
+      const y = ((t * sp + i * 47) % 780) - 40, x = sx + Math.sin(t * 2 + i) * 26;
+      c.fillStyle = colors[i % 5]; c.save(); c.translate(x, y); c.rotate(t * 3 + i); c.fillRect(-7, -5, 14, 10); c.restore();
+    }
+  }
+
+  function drawScene(c, beatName, p, t, speaker, level, line) {
+    const B = BEATS[beatName] || BEATS.intro;
+    c.save();
+    if (B.shake && p < .35) c.translate(Math.sin(t * 60) * 9, Math.cos(t * 50) * 5);
+    if (B.gray) c.filter = 'grayscale(1) brightness(.9)';
+    background(c);
+    let zx = B.zhe;
+    if (B.zheFrom !== undefined) { const k = Math.min(1, p * 3); zx = B.zheFrom + (B.zhe - B.zheFrom) * (1 - (1 - k) * (1 - k)); }
+    person(c, 985, { body: ROLE['小晴'].color, hair: '#3A2A22', style: 'tail', mood: B.qing, talking: speaker === '小晴', level, t });
+    person(c, 690, { body: ROLE['小宇'].color, hair: '#2E2420', style: 'spike', mood: B.yu, talking: speaker === '小宇', level, t, phone: B.phone ? 'low' : 1 });
+    person(c, zx, { body: ROLE['阿哲'].color, hair: '#4A3423', style: 'short', mood: B.zheM, talking: speaker === '阿哲', level, t });
+    c.filter = 'none';
+    if (B.clap) clapper(c, B.clap, p);
+    if (B.confetti) confetti(c, t);
+    subtitle(c, line);
+    c.restore();
+  }
+
+  function drawTitle(c, p) {
+    c.fillStyle = '#1F4D3A'; c.fillRect(0, 0, 1280, 720);
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#E8B04B'; c.font = `700 40px ${FONT}`; c.fillText(STORY.credit, 640, 250);
+    c.save(); c.translate(640, 360); const s = Math.min(1, p * 4); c.scale(.8 + .2 * s, .8 + .2 * s);
+    c.fillStyle = '#FBF7EF'; c.font = `900 104px ${FONT}`; c.fillText(STORY.title, 0, 0); c.restore();
+  }
+
+  function drawRewind(c, p, t) {
+    c.save(); c.filter = 'grayscale(1) brightness(.75)';
+    background(c);
+    const zx = 330 + (-160 - 330) * p;
+    person(c, 985, { body: '#888', hair: '#333', style: 'tail', mood: 'calm', t: -t * 4 });
+    person(c, 690, { body: '#888', hair: '#333', style: 'spike', mood: 'look', t: -t * 4, phone: 1 });
+    person(c, zx, { body: '#888', hair: '#333', style: 'short', mood: 'calm', t: -t * 4 });
+    c.filter = 'none';
+    c.fillStyle = 'rgba(255,255,255,.28)';
+    for (let i = 0; i < 4; i++) c.fillRect(0, ((t * 900 + i * 190) % 760) - 20, 1280, 8);
+    c.fillStyle = '#fff'; c.font = `900 110px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('◀◀ 倒帶中', 640, 280);
+    c.restore();
+  }
+
+  function drawEnd(c, p) {
+    c.fillStyle = '#E8B04B'; c.fillRect(0, 0, 1280, 720);
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#1E2A2A'; c.font = `900 84px ${FONT}`; c.fillText(STORY.endLine, 640, 250);
+    c.font = `700 46px ${FONT}`; c.fillText(STORY.endSub, 640, 370);
+    if (p > .35) { c.fillStyle = '#1F4D3A'; c.font = `900 40px ${FONT}`; c.fillText(STORY.endCredit, 640, 500); }
+  }
+
+  /* ===== 聲音 ===== */
+  let actx = null;
+  const audio = () => (actx = actx || new (window.AudioContext || window.webkitAudioContext)());
+  const takes = new Map();       // id -> Blob
+  const decoded = new Map();     // id -> {buf,gain,offset,dur,silent}
+
+  // 存在這台電腦的瀏覽器，不上傳
+  const DB = 'dubbingLesson-' + STORY.id;
+  function db() {
+    return new Promise((ok, no) => {
+      const q = indexedDB.open(DB, 1);
+      q.onupgradeneeded = () => q.result.createObjectStore('takes');
+      q.onsuccess = () => ok(q.result);
+      q.onerror = () => no(q.error);
+    });
+  }
+  async function dbDo(mode, fn) {
+    const d = await db();
+    return new Promise((ok, no) => {
+      const tx = d.transaction('takes', mode), r = fn(tx.objectStore('takes'));
+      tx.oncomplete = () => { d.close(); ok(r && r.result); };
+      tx.onerror = () => { d.close(); no(tx.error); };
+    });
+  }
+  async function loadTakes() {
+    try {
+      const d = await db();
+      await new Promise(ok => {
+        const c = d.transaction('takes').objectStore('takes').openCursor();
+        c.onsuccess = () => { const k = c.result; if (k) { takes.set(k.key, k.value); k.continue(); } else ok(); };
+        c.onerror = () => ok();
+      });
+      d.close();
+    } catch (e) { console.warn('讀取錄音失敗', e); }
+  }
+
+  // 解碼並去掉前後空白、調整音量，讓每位學生聲音差不多大
+  async function processed(id) {
+    if (decoded.has(id)) return decoded.get(id);
+    const blob = takes.get(id);
+    if (!blob) return null;
+    const buf = await audio().decodeAudioData(await blob.arrayBuffer());
+    const d = buf.getChannelData(0), sr = buf.sampleRate, win = Math.max(1, Math.floor(sr * .01));
+    let peak = 0;
+    for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > peak) peak = a; }
+    const th = Math.max(.012, peak * .08);
+    let first = -1, last = -1;
+    for (let i = 0; i + win <= d.length; i += win) {
+      let s = 0; for (let j = i; j < i + win; j++) s += d[j] * d[j];
+      if (Math.sqrt(s / win) > th) { if (first < 0) first = i; last = i + win; }
+    }
+    if (first < 0) { first = 0; last = d.length; }
+    const offset = Math.max(0, first / sr - .12), end = Math.min(buf.duration, last / sr + .2);
+    const r = { buf, gain: peak > .001 ? Math.min(5, .85 / peak) : 1, offset, dur: Math.max(.2, end - offset), silent: peak < .006 };
+    decoded.set(id, r);
+    return r;
+  }
+
+  /* ===== 錄音室 ===== */
+  const $ = id => document.getElementById(id);
+  const sc = $('studioCanvas').getContext('2d');
+  let cur = 1, mic = null, micAn = null, recorder = null, busy = false, previewSrc = null, previewAn = null, studioTimer = null, autoStop = null, recStart = 0;
+
+  function renderList() {
+    $('list').innerHTML = LINES.map(l => `<button class="li ${l.id === cur ? 'on' : ''}" data-id="${l.id}"><span>${l.id}</span><span style="font-weight:900;color:${l.id === cur ? ROLE[l.role].color : 'inherit'}">${ROLE[l.role].suit} ${l.role}</span><span class="tx">${l.text}</span><span class="ok">${takes.has(l.id) ? '✓' : ''}</span></button>`).join('');
+    $('doneCount').textContent = `${takes.size} / 10`;
+    $('listenBtn').disabled = !takes.has(cur) || busy;
+  }
+  function pick(id) { stopPreview(); cur = id; renderList(); setStatus(`第 ${id} 句，請 ${byId(id).role} 準備。`); }
+  const setStatus = s => { $('status').textContent = s; };
+
+  $('list').addEventListener('click', e => { const b = e.target.closest('.li'); if (b && !busy) pick(+b.dataset.id); });
+  $('nextLine').onclick = () => { if (!busy) pick(cur === 10 ? 1 : cur + 1); };
+
+  function studioLoop() {
+    const l = byId(cur);
+    let lv = 0;
+    const an = recorder ? micAn : previewAn;
+    if (an) lv = rms(an);
+    $('meter').style.width = `${Math.min(100, (micAn ? rms(micAn) : 0) * 500)}%`;
+    drawScene(sc, l.beat, 1, performance.now() / 1000, (recorder || previewSrc) ? l.role : null, lv, l);
+  }
+  const tmp = new Float32Array(1024);
+  function rms(an) { an.getFloatTimeDomainData(tmp); let s = 0; for (let i = 0; i < tmp.length; i++) s += tmp[i] * tmp[i]; return Math.sqrt(s / tmp.length); }
+
+  async function openMic() {
+    if (mic) return mic;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('nosupport');
+    const dev = $('micSel').value;
+    mic = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: dev ? { exact: dev } : undefined, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    const c = audio(); await c.resume();
+    micAn = c.createAnalyser(); micAn.fftSize = 2048;
+    c.createMediaStreamSource(mic).connect(micAn);
+    fillMics();
+    return mic;
+  }
+  function closeMic() { if (mic) mic.getTracks().forEach(t => t.stop()); mic = null; micAn = null; $('meter').style.width = '0'; }
+  async function fillMics() {
+    try {
+      const ds = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput');
+      const was = $('micSel').value;
+      $('micSel').innerHTML = '<option value="">預設麥克風</option>' + ds.filter(d => d.deviceId && d.deviceId !== 'default').map(d => `<option value="${d.deviceId}">${d.label || '麥克風'}</option>`).join('');
+      $('micSel').value = was;
+    } catch (e) {}
+  }
+  $('micSel').onchange = () => { if (!recorder) closeMic(); };
+
+  function micError(e) {
+    const n = e && e.name;
+    if (n === 'NotAllowedError') return '麥克風被封鎖：請按網址列左邊的圖示，允許麥克風後重新整理。';
+    if (n === 'NotFoundError') return '找不到麥克風：請檢查有沒有接好，或在右下角換一支。';
+    if (n === 'NotReadableError') return '麥克風被別的程式佔用：請關掉視訊或錄音程式再試。';
+    if (e && e.message === 'nosupport') return '這個瀏覽器不能錄音：請改用 Chrome 或 Edge 從網址開啟。';
+    return '麥克風打不開，請換 Chrome 或 Edge 再試一次。';
+  }
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  async function startRec() {
+    stopPreview();
+    try { await openMic(); } catch (e) { console.warn(e); setStatus(micError(e)); return; }
+    busy = true; setNavLock(true); renderList();
+    $('recBtn').disabled = true;
+    const box = $('count3'); box.classList.add('on');
+    for (const n of [3, 2, 1]) { box.textContent = n; await wait(650); }
+    box.classList.remove('on');
+    const type = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(t => MediaRecorder.isTypeSupported(t));
+    const chunks = [];
+    const rec = new MediaRecorder(mic, type ? { mimeType: type } : undefined);
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => finishRec(new Blob(chunks, { type: rec.mimeType }));
+    rec.start();
+    recorder = rec; recStart = performance.now();
+    $('recBtn').disabled = false; $('recBtn').textContent = '■ 錄好了';
+    setStatus(`🔴 錄音中：${byId(cur).role}，開始說！`);
+    autoStop = setTimeout(stopRec, 15000);
+  }
+  function stopRec() {
+    clearTimeout(autoStop);
+    if (recorder && recorder.state !== 'inactive') recorder.stop();
+  }
+  async function finishRec(blob) {
+    recorder = null;
+    busy = false; setNavLock(false);
+    $('recBtn').textContent = '● 重錄這一句';
+    setStatus('存檔中……');
+    const id = cur;
+    takes.set(id, blob); decoded.delete(id);
+    try { await dbDo('readwrite', s => s.put(blob, id)); } catch (e) { console.warn('存檔失敗', e); }
+    renderList();
+    try {
+      const p = await processed(id);
+      if (p.silent) { setStatus('好像沒有錄到聲音，看一下音量條有沒有動，再重錄一次。'); return; }
+      setStatus('錄好了！聽聽看，滿意就按「下一句」。');
+      playPreview(id);
+    } catch (e) { console.warn(e); setStatus('這段錄音讀不出來，請重錄一次。'); takes.delete(id); renderList(); }
+  }
+  $('recBtn').onclick = e => { e.currentTarget.blur(); if (recorder) stopRec(); else if (!busy) startRec(); };
+
+  async function playPreview(id) {
+    stopPreview();
+    const p = await processed(id); if (!p) return;
+    const c = audio(); await c.resume();
+    const s = c.createBufferSource(), g = c.createGain(), an = c.createAnalyser();
+    an.fftSize = 2048; s.buffer = p.buf; g.gain.value = p.gain;
+    s.connect(g); g.connect(an); an.connect(c.destination);
+    s.onended = () => { if (previewSrc === s) { previewSrc = null; previewAn = null; } };
+    previewSrc = s; previewAn = an;
+    s.start(0, p.offset, p.dur);
+  }
+  function stopPreview() { if (previewSrc) { try { previewSrc.stop(); } catch (e) {} } previewSrc = null; previewAn = null; }
+  $('listenBtn').onclick = e => { e.currentTarget.blur(); playPreview(cur); };
+
+  /* ===== 首映與合成影片 ===== */
+  const fc = $('filmCanvas').getContext('2d');
+  let filmRun = null, filmBlob = null, filmType = '';
+  const PAD = .35;
+
+  async function buildTimeline() {
+    const tl = [{ kind: 'title', dur: 2.6 }];
+    for (const it of ORDER) {
+      if (it === 'rewind') { tl.push({ kind: 'rewind', dur: 1.7 }); continue; }
+      const line = byId(it);
+      let p = null;
+      try { p = await processed(it); } catch (e) { console.warn(e); }
+      const speech = p ? p.dur : Math.max(1.6, line.text.length * .2);
+      tl.push({ kind: 'line', line, p, dur: speech + PAD, speech });
+    }
+    tl.push({ kind: 'end', dur: 4.5 });
+    let at = 0;
+    tl.forEach(s => { s.at = at; at += s.dur; });
+    return { tl, total: at };
+  }
+
+  function videoType() {
+    const list = ['video/mp4;codecs=avc1.42E01F,mp4a.40.2', 'video/mp4;codecs=avc1.42E01F,opus', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    return window.MediaRecorder ? list.find(t => MediaRecorder.isTypeSupported(t)) : '';
+  }
+
+  async function playFilm() {
+    if (filmRun) return;
+    stopPreview(); closeMic();
+    const { tl, total } = await buildTimeline();
+    const c = audio(); await c.resume();
+    const master = c.createGain(), an = c.createAnalyser(), dest = c.createMediaStreamDestination();
+    an.fftSize = 2048;
+    master.connect(an); master.connect(c.destination); master.connect(dest);
+
+    $('filmPanel').classList.add('off'); $('bar').classList.add('hide'); setNavLock(true);
+    drawTitle(fc, 0);
+
+    // 合成：畫面 + 聲音同步錄成影片；不支援時仍可直接放映
+    let vr = null; const chunks = []; filmBlob = null; $('dlFilm').disabled = true;
+    const type = videoType();
+    try {
+      if (type && $('filmCanvas').captureStream) {
+        const stream = $('filmCanvas').captureStream(30);
+        dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+        vr = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 4000000, audioBitsPerSecond: 128000 });
+        vr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+        vr.start(1000);
+      }
+    } catch (e) { console.warn('無法合成影片，改為直接放映', e); vr = null; }
+
+    const t0 = c.currentTime + .25;
+    const sources = [];
+    tl.forEach(s => {
+      if (s.kind === 'line' && s.p) {
+        const src = c.createBufferSource(), g = c.createGain();
+        src.buffer = s.p.buf; g.gain.value = s.p.gain;
+        src.connect(g); g.connect(master);
+        src.start(t0 + s.at + .05, s.p.offset, s.p.dur);
+        sources.push(src);
+      }
+    });
+
+    const run = { done: false, aborted: false };
+    filmRun = run;
+    const finish = aborted => {
+      if (run.done) return;
+      run.done = true;
+      clearInterval(timer);
+      sources.forEach(s => { try { s.stop(); } catch (e) {} });
+      master.disconnect();
+      const reset = () => {
+        filmRun = null;
+        $('filmPanel').classList.remove('off'); $('bar').classList.remove('hide'); setNavLock(false);
+        $('playFilm').textContent = '▶ 再看一次';
+      };
+      if (vr && vr.state !== 'inactive') {
+        vr.onstop = () => {
+          if (!aborted && chunks.length) {
+            filmBlob = new Blob(chunks, { type: vr.mimeType }); filmType = vr.mimeType;
+            $('dlFilm').disabled = false;
+            $('filmMsg').textContent = `影片完成了（${Math.round(total)} 秒），可以下載保存。`;
+          } else if (aborted) { $('filmMsg').textContent = '已中止，可以重新開始。'; }
+          reset();
+        };
+        vr.stop();
+      } else {
+        $('filmMsg').textContent = aborted ? '已中止，可以重新開始。' : '放映完成。這個瀏覽器不能合成影片，改用 Chrome 或 Edge 就能下載。';
+        reset();
+      }
+    };
+    run.abort = () => finish(true);
+
+    const timer = setInterval(() => {
+      const t = c.currentTime - t0;
+      if (t >= total) { finish(false); return; }
+      if (t < 0) { drawTitle(fc, 0); return; }
+      const s = tl.find(x => t >= x.at && t < x.at + x.dur) || tl[tl.length - 1];
+      const p = (t - s.at) / s.dur;
+      if (s.kind === 'title') drawTitle(fc, p);
+      else if (s.kind === 'rewind') drawRewind(fc, p, t);
+      else if (s.kind === 'end') drawEnd(fc, p);
+      else {
+        const inSpeech = t - s.at < s.speech;
+        let lv = s.p ? rms(an) : (inSpeech ? .1 + Math.abs(Math.sin(t * 11)) * .08 : 0);
+        drawScene(fc, s.line.beat, p, t, inSpeech && s.line.role !== '旁白' && s.line.role !== '導演' ? s.line.role : null, lv, s.line);
+      }
+    }, 33);
+  }
+  $('playFilm').onclick = e => {
+    e.currentTarget.blur();
+    playFilm().catch(err => {
+      console.error(err);
+      $('filmPanel').classList.remove('off'); $('bar').classList.remove('hide'); setNavLock(false); filmRun = null;
+      $('filmMsg').textContent = '放映時出了問題，請重新整理後再試一次；錄音都還在。';
+    });
+  };
+  $('dlFilm').onclick = () => {
+    if (!filmBlob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(filmBlob);
+    a.download = `${STORY.file}.${filmType.includes('mp4') ? 'mp4' : 'webm'}`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  };
+  // 清除前多按一次確認，避免誤刪
+  let armClear = null;
+  $('clearAll').onclick = async e => {
+    const b = e.currentTarget;
+    if (!armClear) { b.textContent = '確定要刪除所有錄音和影片？再按一次'; armClear = setTimeout(() => { armClear = null; b.textContent = '下課清除所有錄音'; }, 4000); return; }
+    clearTimeout(armClear); armClear = null;
+    takes.clear(); decoded.clear(); filmBlob = null; $('dlFilm').disabled = true;
+    try { await dbDo('readwrite', s => s.clear()); } catch (err) { console.warn(err); }
+    b.textContent = '已清除所有錄音'; $('filmMsg').textContent = '錄音和影片都清除了。';
+    $('playFilm').textContent = '▶ 開始首映'; renderList();
+  };
+
+  /* ===== 投影片操作 ===== */
+  const deck = $('deck'), slides = [...deck.querySelectorAll('.slide')];
+  const notes = $('notes'), count = $('count'), progress = $('progress');
+  let i = 0, typed = '', navLock = false;
+  function setNavLock(v) { navLock = v; }
+  function fit() { const s = Math.min(innerWidth / 1920, innerHeight / 1080); deck.style.transform = `translate(-50%, -50%) scale(${s})`; }
+  function show(n) {
+    if (navLock) return;
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((el, k) => el.classList.toggle('on', k === i));
+    count.textContent = `${i + 1} / ${slides.length}`;
+    progress.style.width = `${(i + 1) / slides.length * 100}%`;
+    const aside = slides[i].querySelector('aside');
+    notes.innerHTML = `<b>第 ${i + 1} 頁講稿：</b>` + (aside ? aside.textContent : '（無）');
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    const here = slides[i];
+    if (here.id === 'studio') { renderList(); if (!studioTimer) studioTimer = setInterval(studioLoop, 40); studioLoop(); }
+    else { clearInterval(studioTimer); studioTimer = null; stopPreview(); closeMic(); }
+    if (here.id === 'film') {
+      drawTitle(fc, 1);
+      const miss = LINES.filter(l => !takes.has(l.id)).map(l => l.id);
+      if (!filmRun && !filmBlob) $('filmMsg').textContent = miss.length ? `還有第 ${miss.join('、')} 句沒錄，播放時只會顯示字幕。` : '10 句都錄好了，全班一起看！';
+    }
+  }
+  const go = d => show(i + d);
+  const toggleNotes = () => notes.classList.toggle('on');
+  function toggleFs() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.().catch(() => {}); }
+  $('prev').onclick = e => { e.stopPropagation(); go(-1); };
+  $('next').onclick = e => { e.stopPropagation(); go(1); };
+  $('noteBtn').onclick = e => { e.stopPropagation(); toggleNotes(); };
+  $('fsBtn').onclick = e => { e.stopPropagation(); toggleFs(); };
+
+  addEventListener('keydown', e => {
+    if (e.key === 'Escape' && filmRun && filmRun.abort) { filmRun.abort(); return; }
+    if (e.target.closest && e.target.closest('button, select')) { if (e.key === ' ' || e.key === 'Enter') return; }
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key === 'n' || e.key === 'N') toggleNotes();
+    else if (e.key === 'f' || e.key === 'F') toggleFs();
+    else if (/^[0-9]$/.test(e.key)) typed += e.key;
+    else if (e.key === 'Enter' && typed) { show(parseInt(typed, 10) - 1); typed = ''; }
+  });
+  // 點畫面左三分之一上一頁，其餘下一頁；配音室與首映頁不用點擊換頁，避免誤觸
+  addEventListener('click', e => {
+    if (e.target.closest('.bar, .notes') || slides[i].hasAttribute('data-interactive')) return;
+    go(e.clientX < innerWidth / 3 ? -1 : 1);
+  });
+  let x0 = null;
+  addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', e => {
+    if (x0 === null || slides[i].hasAttribute('data-interactive')) { x0 = null; return; }
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+    x0 = null;
+  });
+  addEventListener('resize', fit);
+  addEventListener('beforeunload', closeMic);
+
+  fit();
+  loadTakes().finally(() => {
+    show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+  });
+})();
+</script>
+</body>
+</html>
